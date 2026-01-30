@@ -1,0 +1,715 @@
+```{r}
+library(dplyr)
+library(leaflet)
+library(htmlwidgets)
+library(sf)
+```
+
+```{r}
+in.counties <- st_read("tl_2021_18_tract.shp")
+in.counties
+```
+
+```{r}
+in.counties %>% 
+  leaflet() %>% 
+  addProviderTiles('OpenStreetMap') %>% 
+  addPolygons(weight=1, fillOpacity=.25, label=~NAME)
+
+```
+
+```{r}
+in.counties %>% 
+  leaflet() %>% 
+  addProviderTiles('OpenStreetMap') %>% 
+  addPolygons(weight=1, fillOpacity=.25, label=~NAME)
+
+```
+
+```{r}
+## Define the county FIPS codes
+county_fips <- c("099", "141", "039")
+
+# Filter for those counties
+filtered_counties <- in.counties %>%
+  filter(COUNTYFP %in% county_fips)
+```
+
+```{r}
+filtered_counties %>% 
+  leaflet() %>% 
+  addProviderTiles('OpenStreetMap') %>% 
+  addPolygons(weight=1, fillOpacity=.25, label=~NAME)
+```
+
+```{r}
+# We begin by subsetting the 'filtered_counties' into three new objects one for each county.
+# I also took the original csv and split it into three different ones so this work smoothly.
+
+# We begin by first subsetting into tracts by county as each their own object.
+
+filtered_counties1 <- filtered_counties %>%
+  filter(COUNTYFP == "039")
+sort(filtered_counties1$NAME)
+# this is Elkhart
+```
+
+```{r}
+# this is St. Joseph
+filtered_counties2 <- filtered_counties %>%
+  filter(COUNTYFP == "141")
+sort(filtered_counties2$NAME)
+length(sort(filtered_counties2$NAME))
+```
+
+```{r}
+# this is Marshal
+filtered_counties3 <- filtered_counties %>%
+  filter(COUNTYFP == "099")
+sort(filtered_counties3$NAME)
+length(sort(filtered_counties3$NAME))
+
+```
+
+```{r}
+# now load in the csv's
+df1 <- read.csv("Elkhart_Age_Data_Transposed.csv", stringsAsFactors = FALSE) # elkhart
+df2 <- read.csv("St_Joseph_Age_Data_Transposed.csv", stringsAsFactors = FALSE) # st. joseph
+df3 <- read.csv("Marshall_Age_Data_Transposed.csv", stringsAsFactors = FALSE) # marshall
+```
+
+```{r}
+df_1 <- read.csv("Elkhart_MedianIncome_Transposed.csv", stringsAsFactors = FALSE) # elkhart
+df_2 <- read.csv("St_Joseph_MedianIncome_Transposed.csv", stringsAsFactors = FALSE) # st. joseph
+df_3 <- read.csv("Marshall_MedianIncome_Tranposed.csv", stringsAsFactors = FALSE) # marshall
+```
+
+```{r}
+df_2$Median.Income.
+```
+
+```{r}
+DF1 <- read.csv("Elkhart_PovPercent_Transposed.csv", stringsAsFactors = FALSE) # elkhart
+DF2 <- read.csv("St_Joseph_PovPercent_Transposed.csv", stringsAsFactors = FALSE) # st. joseph
+DF3 <- read.csv("Marhsall_PovPercent_Transposed.csv", stringsAsFactors = FALSE) # marshall
+```
+
+```{r}
+DF_1 <- read.csv("elkhart_sex.csv", stringsAsFactors = FALSE) # elkhart
+DF_2 <- read.csv("joseph_sex.csv", stringsAsFactors = FALSE) # st. joseph
+DF_3 <- read.csv("marshall_sex.csv", stringsAsFactors = FALSE) # marshall
+```
+
+```{r}
+DataF1 <- read.csv("Elkhart_Tracts_Cleaned.csv", stringsAsFactors = FALSE) # elkhart
+DataF2 <- read.csv("StJOE_Renamed_Tract_Column.csv", stringsAsFactors = FALSE) # st. joseph
+DataF3 <- read.csv("Marshall_Tracts_Cleaned.csv", stringsAsFactors = FALSE) # marshall
+
+```
+
+```{r}
+colnames(DF_1)[1]  <- "NAME"
+colnames(DF_2)[1]  <- "NAME"
+colnames(DF_3)[1]  <- "NAME"
+```
+
+```{r}
+str(df1)
+str(df2)
+str(df3)
+str(df_1)
+str(df_2)
+str(df_3)
+str(DF1)
+str(DF2)
+str(DF3)
+```
+
+```{r}
+length(df1$NAME)
+sort(df_1$NAME)
+sort(df_2$NAME)
+length(df_2$NAME)
+sort(df2$NAME)
+length(df2$NAME)
+sort(DF2$NAME)
+length(DF2$NAME)
+```
+
+```{r}
+# Here the column type must match up to filtered counties column type for 'NAME' that is what we will merge them by later on
+df1$NAME <- as.character(df1$NAME)
+df2$NAME <- as.character(df2$NAME)
+df3$NAME <- as.character(df3$NAME)
+```
+
+```{r}
+df_1$NAME <- as.character(df_1$NAME)
+df_2$NAME <- as.character(df_2$NAME)
+df_3$NAME <- as.character(df_3$NAME)
+```
+
+```{r}
+DF1$NAME <- as.character(DF1$NAME)
+DF2$NAME <- as.character(DF2$NAME)
+DF3$NAME <- as.character(DF3$NAME)
+```
+
+```{r}
+DF_1$NAME <- as.character(DF_1$NAME)
+DF_2$NAME <- as.character(DF_2$NAME)
+DF_3$NAME <- as.character(DF_3$NAME)
+```
+
+```{r}
+DataF1$NAME <- as.character(DataF1$NAME)
+DataF2$NAME <- as.character(DataF2$NAME)
+DataF3$NAME <- as.character(DataF3$NAME)
+```
+
+```{r}
+filtered_counties2$NAME <- as.character(filtered_counties2$NAME)
+str(filtered_counties2)
+```
+
+```{r}
+filtered_counties2$NAME[filtered_counties2$NAME == "113.10"] <- "113.1"
+```
+
+```{r}
+# merge filtered counties with df_1, and then merge that dataframe with dataframe df1. Then merge with DF1
+counties1 <- merge(filtered_counties1, df_1, by = "NAME", all.x = TRUE)
+counties_1 <- merge(counties1, df1, by = "NAME", all.x = TRUE)
+Counties1 <- merge(counties_1, DF1, by = "NAME", all.x = TRUE)
+COUNTIES1 <- merge(Counties1, DataF1, by = "NAME", all.x = TRUE)
+Counties_1 <- merge(COUNTIES1, DF_1, by = "NAME", all.x = TRUE)
+```
+
+```{r}
+# merge filtered counties with df_2, and then merge that dataframe with dataframe df2. Then merge with DF2
+counties2 <- merge(filtered_counties2, df_2, by = "NAME", all.x = TRUE)
+counties_2 <- merge(counties2, df2, by = "NAME", all.x = TRUE)
+Counties2 <- merge(counties_2, DF2, by = "NAME", all.x = TRUE)
+COUNTIES2 <- merge(Counties2, DataF2, by = "NAME", all.x = TRUE)
+Counties_2 <- merge(COUNTIES2, DF_2, by = "NAME", all.x = TRUE)
+```
+
+```{r}
+# merge filtered counties with df_3, and then merge that dataframe with dataframe df3. Then merge with DF3
+counties3 <- merge(filtered_counties3, df_3, by = "NAME", all.x = TRUE)
+counties_3 <- merge(counties3, df3, by = "NAME", all.x = TRUE)
+Counties3 <- merge(counties_3, DF3, by = "NAME", all.x = TRUE)
+COUNTIES_3 <- merge(Counties3, DataF3, by = "NAME", all.x = TRUE)
+Counties_3 <- merge(COUNTIES_3, DF_3, by = "NAME", all.x = TRUE)
+```
+
+```{r}
+DataF3
+COUNTIES_3
+Counties_3$CensusReporter_Link
+# checking the strucure of counties1
+str(Counties_1)
+length(Counties_1$NAME)
+sort(Counties_1$NAME)
+sort(df1$NAME)
+str(Counties_2)
+# checking the structure of counties3
+str(Counties_3)
+```
+
+```{r}
+# creating the poverty variable
+Counties_1$POVERTY <- Counties_1$Income.in.the.past.12.months.below.poverty.level.
+length(names(Counties1))
+
+# creating the poverty variable
+Counties_2$POVERTY <- Counties_2$Income.in.the.past.12.months.below.poverty.level.
+length(names(Counties2))
+
+# creating the poverty variable
+Counties_3$POVERTY <- Counties_3$Income.in.the.past.12.months.below.poverty.level.
+length(names(Counties3))
+```
+
+```{r}
+colnames(Counties_1)
+Counties_1$Income.in.the.past.12.months.below.poverty.level.
+```
+
+```{r}
+# renaming poverty levels so that it is easier to work with
+Counties_1 <- Counties_1 %>%
+  rename(Poverty_Level = Income.in.the.past.12.months.below.poverty.level.)
+
+# ensuring that the data actually displays
+Counties_1$Poverty_Level
+
+# renaming poverty levels so that it is easier to work with
+Counties_2 <- Counties_2 %>%
+  rename(Poverty_Level = Income.in.the.past.12.months.below.poverty.level.)
+
+# renaming poverty levels so that it is easier to work with
+Counties_3 <- Counties_3 %>%
+  rename(Poverty_Level = Income.in.the.past.12.months.below.poverty.level.)
+
+Counties_2$Poverty_Level
+```
+
+```{r}
+# Tract 113.10 is missing a lot
+Counties_2 %>%
+  filter(if_any(everything(), is.na)) 
+
+# so we have a value displaying for tract 113.10 in df_2
+df_2$Median.Income.
+
+df2$Male..total..
+
+DF2$Income.in.the.past.12.months.below.poverty.level.
+```
+
+```{r}
+sort(filtered_counties2$NAME)
+
+sort(df_2$NAME)
+```
+
+```{r}
+counties2$Median.Income.
+
+Counties_3$Poverty_Level
+
+# Istarted with counties_2 as a precaution just to make sure 
+colnames(Counties_2)
+
+Counties_2$Male..Under.5.years.x
+```
+
+```{r}
+Counties_2$Under_18 <- Counties_2$Male..Under.5.years.x +
+                        Counties_2$Male..5.to.9.years +
+                        Counties_2$Male..10.to.14.years +
+                        Counties_2$Male..15.to.17.years +
+                        Counties_2$Female..Under.5.years.x +
+                        Counties_2$Female..5.to.9.years +
+                        Counties_2$Female..10.to.14.years +
+                        Counties_2$Female..15.to.17.years
+Counties_2$Under_18
+
+Counties_2$Under_18Per <- (Counties_2$Under_18 / Counties_2$Total) * 100
+
+Counties_1$Under_18 <- Counties_1$Male..Under.5.years.x +
+                        Counties_1$Male..5.to.9.years +
+                        Counties_1$Male..10.to.14.years +
+                        Counties_1$Male..15.to.17.years +
+                        Counties_1$Female..Under.5.years.x +
+                        Counties_1$Female..5.to.9.years +
+                        Counties_1$Female..10.to.14.years +
+                        Counties_1$Female..15.to.17.years
+Counties_1$Under_18
+
+Counties_1$Under_18Per <- (Counties_1$Under_18 / Counties_1$Total) * 100
+
+Counties_3$Under_18 <- Counties_3$Male..Under.5.years.x +
+                        Counties_3$Male..5.to.9.years +
+                        Counties_3$Male..10.to.14.years +
+                        Counties_3$Male..15.to.17.years +
+                        Counties_3$Female..Under.5.years.x +
+                        Counties_3$Female..5.to.9.years +
+                        Counties_3$Female..10.to.14.years +
+                        Counties_3$Female..15.to.17.years
+Counties_3$Under_18
+
+Counties_3$Under_18Per <- (Counties_3$Under_18 / Counties_3$Total) * 100
+
+Counties_2$Over_65 <- Counties_2$Male..65.and.66.years +
+                        Counties_2$Male..67.to.69.years +
+                        Counties_2$Male..70.to.74.years +
+                        Counties_2$Male..75.to.79.years +
+                        Counties_2$Male..80.to.84.years +
+                        Counties_2$Male..85.years.and.over +
+                        Counties_2$Female..65.and.66.years +
+                        Counties_2$Female..67.to.69.years +
+                        Counties_2$Female..70.to.74.years +
+                        Counties_2$Female..75.to.79.years +
+                        Counties_2$Female..80.to.84.years +
+                        Counties_2$Female..85.years.and.over
+Counties_2$Over_65
+
+Counties_2$Over_65Per <- (Counties_2$Over_65 / Counties_2$Total) * 100
+Counties_2$Over_65Per
+
+Counties_1$Over_65 <- Counties_1$Male..65.and.66.years +
+                        Counties_1$Male..67.to.69.years +
+                        Counties_1$Male..70.to.74.years +
+                        Counties_1$Male..75.to.79.years +
+                        Counties_1$Male..80.to.84.years +
+                        Counties_1$Male..85.years.and.over +
+                        Counties_1$Female..65.and.66.years +
+                        Counties_1$Female..67.to.69.years +
+                        Counties_1$Female..70.to.74.years +
+                        Counties_1$Female..75.to.79.years +
+                        Counties_1$Female..80.to.84.years +
+                        Counties_1$Female..85.years.and.over
+Counties_1$Over_65
+
+Counties_1$Over_65Per <- (Counties_1$Over_65 / Counties_1$Total) * 100
+Counties_1$Over_65Per
+
+Counties_3$Over_65 <- Counties_3$Male..65.and.66.years +
+                        Counties_3$Male..67.to.69.years +
+                        Counties_3$Male..70.to.74.years +
+                        Counties_3$Male..75.to.79.years +
+                        Counties_3$Male..80.to.84.years +
+                        Counties_3$Male..85.years.and.over +
+                        Counties_3$Female..65.and.66.years +
+                        Counties_3$Female..67.to.69.years +
+                        Counties_3$Female..70.to.74.years +
+                        Counties_3$Female..75.to.79.years +
+                        Counties_3$Female..80.to.84.years +
+                        Counties_3$Female..85.years.and.over
+Counties_3$Over_65
+
+Counties_3$Over_65Per <- (Counties_3$Over_65 / Counties_3$Total) * 100
+Counties_3$Over_65Per
+
+colnames(Counties_1)
+
+# Now we will select the columns of interest
+Selected_1 <- Counties_1 %>% select(NAME, Median.Income., Over_65Per, Under_18Per, POVERTY, CensusReporter_Link)
+Selected_2 <- Counties_2 %>% select(NAME, Median.Income., Over_65Per, Under_18Per, POVERTY, CensusReporter_Link)
+Selected_3 <- Counties_3 %>% select(NAME, Median.Income., Over_65Per, Under_18Per, POVERTY, CensusReporter_Link)
+```
+
+```{r}
+str(Selected_1)
+
+Selected_1$Median.Income. <- as.numeric(gsub("[\\$,]", "", Selected_1$Median.Income.))
+
+str(Selected_1)
+
+str(Selected_2)
+# it appears we have lost an observation here somehow assuming that this one is tract 113.10
+
+str(Selected_3)
+
+merged_df <- rbind(Selected_1, Selected_2, Selected_3)
+
+str(merged_df)
+```
+
+```{r}
+library(leaflet)
+library(htmlwidgets)
+library(dplyr)
+
+# Convert character columns to numeric values by removing non-numeric characters.
+# This creates new columns 'MedianIncomeNum' and 'PovertyNum'.
+merged_df <- merged_df %>%
+  mutate(
+    MedianIncomeNum = as.numeric(gsub("[^0-9.-]", "", Median.Income.)),
+    PovertyNum = as.numeric(gsub("[^0-9.-]", "", POVERTY))
+  )
+
+# Create color palettes for each variable using the numeric versions for Median Income and Poverty
+pal_under18 <- colorNumeric(palette = "BuPu", domain = merged_df$Under_18Per)
+pal_over65  <- colorNumeric(palette = "YlOrRd", domain = merged_df$Over_65Per)
+pal_income  <- colorNumeric(palette = "Greens", domain = merged_df$MedianIncomeNum)
+pal_poverty <- colorNumeric(palette = "Reds", domain = merged_df$PovertyNum)
+
+# Build the leaflet map with each variable as a separate base layer
+map <- leaflet(merged_df) %>% 
+  addProviderTiles("OpenStreetMap") %>%
+  
+  # Under 18 layer
+  addPolygons(fillColor = ~pal_under18(Under_18Per),
+              group = "Under 18",
+              weight = 0.5,
+              fillOpacity = 0.9,
+              label = ~paste("County:", NAME, 
+                             "Percent Under 18:", sprintf("%.2f", Under_18Per), "%")) %>%
+  
+  # Over 65 layer
+  addPolygons(fillColor = ~pal_over65(Over_65Per),
+              group = "Over 65",
+              weight = 0.5,
+              fillOpacity = 0.9,
+              label = ~paste("County:", NAME, 
+                             "Percent Over 65:", sprintf("%.2f", Over_65Per), "%")) %>%
+  
+  # Median Income layer (using original character data for the label)
+  addPolygons(fillColor = ~pal_income(MedianIncomeNum),
+              group = "Median Income",
+              weight = 0.5,
+              fillOpacity = 0.9,
+              label = ~paste("County:", NAME, 
+                             "Median Income:", Median.Income.)) %>%
+  
+  # Poverty layer (using original character data for the label)
+  addPolygons(fillColor = ~pal_poverty(PovertyNum),
+              group = "Poverty",
+              weight = 0.5,
+              fillOpacity = 0.9,
+              label = ~paste("County:", NAME, 
+                             "Poverty:", POVERTY)) %>%
+  
+  # Layers control to switch between base layers
+  addLayersControl(
+    baseGroups = c("Under 18", "Over 65", "Median Income", "Poverty"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+
+map
+```
+
+```{r}
+library(leaflet)
+library(scales)
+
+map <- leaflet(merged_df) %>% 
+  addProviderTiles("CartoDB.Positron") %>%  # Changed to CartoDB base layer
+  
+  # Under 18 layer + legend
+  addPolygons(fillColor = ~pal_under18(Under_18Per),
+              group = "Under 18",
+              weight = 0.5,
+              fillOpacity = 0.6,
+              label = ~paste0("Tract: ", NAME, 
+                             "\nPercent Under 18: ", sprintf("%.1f", Under_18Per), "%"),
+              labelOptions = labelOptions(
+                style = list("white-space" = "pre", "font-weight" = "bold"),
+                direction = "auto")) %>%
+  addLegend(position = "bottomleft",
+            pal = pal_under18, 
+            values = ~Under_18Per,
+            title = "Under 18 (%)",
+            group = "Under 18") %>%
+  
+  # Over 65 layer + legend
+  addPolygons(fillColor = ~pal_over65(Over_65Per),
+              group = "Over 65",
+              weight = 0.5,
+              fillOpacity = 0.6,
+              label = ~paste0("Tract: ", NAME, 
+                             "\nPercent Over 65: ", sprintf("%.1f", Over_65Per), "%"),
+              labelOptions = labelOptions(
+                style = list("white-space" = "pre", "font-weight" = "bold"),
+                direction = "auto")) %>%
+  addLegend(position = "bottomleft",
+            pal = pal_over65,
+            values = ~Over_65Per,
+            title = "Over 65 (%)",
+            group = "Over 65") %>%
+  
+  # Median Income layer + legend
+  addPolygons(fillColor = ~pal_income(MedianIncomeNum),
+              group = "Median Income",
+              weight = 0.5,
+              fillOpacity = 0.6,
+              label = ~paste0("Tract: ", NAME, 
+                             "\nMedian Income: $", comma(MedianIncomeNum)), 
+              labelOptions = labelOptions(
+                style = list("white-space" = "pre", "font-weight" = "bold"),
+                direction = "auto")) %>%
+  addLegend(position = "bottomright",
+            pal = pal_income,
+            values = ~MedianIncomeNum,
+            title = "Median Income",
+            group = "Median Income",
+            labFormat = labelFormat(prefix = "$")) %>%
+  
+  # Poverty layer + legend
+  addPolygons(fillColor = ~pal_poverty(PovertyNum),
+              group = "Poverty",
+              weight = 0.5,
+              fillOpacity = 0.6,
+              label = ~paste0("Tract: ", NAME, 
+                             "\nPoverty Level: ", sprintf("%.1f", PovertyNum), "%"),
+              labelOptions = labelOptions(
+                style = list("white-space" = "pre", "font-weight" = "bold"),
+                direction = "auto")) %>%
+  addLegend(position = "bottomright",
+            pal = pal_poverty,
+            values = ~PovertyNum,
+            title = "Poverty Level (%)",
+            group = "Poverty") %>%
+  
+  # Layer control
+  addLayersControl(
+    baseGroups = c("Under 18", "Over 65", "Median Income", "Poverty"),
+    options = layersControlOptions(collapsed = FALSE))
+
+map
+```
+
+```{r}
+# Load required libraries
+library(leaflet)
+library(tidygeocoder)
+library(dplyr)
+library(sf)
+library(htmlwidgets)
+
+# Read and geocode pantry locations
+# pantries <- read.csv("CFR_Foodss.csv") %>%
+#   geocode(address = Address, method = "arcgis") %>%  # Free geocoding service
+#   filter(!is.na(lat))  # Remove failed geocodes
+
+# The above file had locations not in the desired three counties. The new file only has pantries in the three counties
+pantries <- read.csv("UPDATE5_Final_Cleaned_Pantry_Locations.csv - Sheet1.csv") %>%
+   geocode(address = Address, method = "arcgis") %>%  # Free geocoding service
+   filter(!is.na(lat))  # Remove failed geocodes
+
+pantries
+```
+
+```{r}
+# Load in the TranspoRoutes shape file and transform to WGS84 coordinate system
+TranspoRoutes <- st_read("TranspoRoutes.shp") %>% st_transform(4326)  
+
+# Custom color palette matching common transit map conventions
+route_colors <- c(
+  "1 Madison / Mishawaka" = "navy",  # Blue
+  "10 Western Avenue" = "turquoise2",       
+  "11 Southside Mishawaka" = "maroon1",  
+  "12 Rum Village" = "midnightblue",        
+  "12/14 Rum Village / Sample" = "thistle", 
+  "13 Corby / Town & Country" = "yellow", # Yellow
+  "14 Sample / Mayflower" = "mediumorchid4",   
+  "15A University Park Mall / Mishawaka (via Main Stree" = "saddlebrown", 
+  "15B University Park Mall / Mishawaka (via Grape Road" = "burlywood4", 
+  "16 Blackthorn Express" = "hotpink",    # Pink
+  "17 The Sweep" = "olivedrab2",             
+  "3A Portage" = "firebrick",               
+  "3B Portage" = "firebrick1",               # Red 
+  "4 Lincolnway West / Excel Center / Airport" = "darkorange", 
+  "5 North Michigan / Laurel Woods" = "navy",            
+  "6 South Michigan / Erskine Village" = "red2",         
+  "7 Notre Dame / University Park Mall" = "forestgreen",        
+  "7A Notre Dame Midnight Express" = "green3",              
+  "8 Miami / Scottsdale" = "turquoise",      
+  "8/6 Miami / Scottsdale / South Michigan / Erskine Vi" = "red2", 
+  "9 Northside Mishawaka" = "magenta3"      # Lavender
+)
+
+# Create palette using cleaned names
+pal_routes <- colorFactor(
+  palette = route_colors,
+  domain = TranspoRoutes$clean_name,
+  na.color = "#808080"  # Safety net for any missed routes
+)
+
+counties <- st_read("County_Boundaries_of_Indiana_Current.shp")
+counties <- st_transform(counties, crs = 4326)
+
+target_counties <- counties %>%
+  filter(
+         name %in% c("Elkhart", "Marshall", "St Joseph"))  # Match exact names in the data
+
+# This is the setup to obtain different radius markers around each pantry
+library(leafgl)
+# First, convert to SF and create buffers (if not already done)
+library(sf)
+pantries_sf <- st_as_sf(pantries, coords = c("long", "lat"), crs = 4326) %>%
+  st_buffer(dist = 1609.34)  # 1-mile buffers
+
+
+
+
+```
+
+```{r}
+# Modified map code
+map1 <- leaflet() %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  
+  # Poverty Layer (LIGHTER)
+  addPolygons(
+    data = merged_df,
+    fillColor = ~pal_poverty(PovertyNum),
+    fillOpacity = 0.55,
+    weight = 0.3,
+    color = "white",
+    group = "Poverty Level",
+    
+    # Interactive features
+    highlightOptions = highlightOptions(
+      weight = 2,
+      color = "#666",
+      bringToFront = TRUE,
+      fillOpacity = 0.9
+    ),
+    label = ~paste("Tract:", NAME, "Poverty:", round(PovertyNum, 1), "%"),
+    popup = ~paste(
+      "<strong>Tract ", NAME, "</strong><br>",
+      "Poverty Level: ", round(PovertyNum, 1), "%<br>",
+      "Median Income: $", formatC(MedianIncomeNum, format = "f", big.mark = ",", digits = 0), "%<br>",
+         "<a href='", CensusReporter_Link	, "' target='_blank'>View Full Tract Info</a>"
+    )
+  ) %>%
+addLegend(
+    position = "bottomright",
+    pal = pal_poverty,
+    values = merged_df$PovertyNum,
+    title = "Poverty Level (%)",
+    group = "Poverty Level"  # Same group as polygons
+  ) %>%
+  
+  # County Boundaries (existing code)
+ addPolylines(
+    data = target_counties,
+    color = "black",       # Boundary color
+    weight = 3,            # Line thickness
+    opacity = 0.8,         # Line transparency
+    group = "County Boundaries",
+    label = ~name,
+    popup = ~paste("<strong>County:</strong>", name)
+  ) %>%
+
+# Bus Routes
+  addPolylines(
+    data = TranspoRoutes,
+    color = ~pal_routes(line_name),
+    weight = 3,
+    opacity = 0.9,
+    group = "Bus Routes",
+    label = ~line_name,
+    popup = ~paste("<strong>Route:</strong>", line_name)
+  ) %>%
+  # Food Pantry RADII (Key modification)
+addGlPolygons(
+  data = pantries_sf,
+  fillColor = "#9370DB19",
+  fillopacity = 0.3, # 5% purple fill
+  color = "#6A5ACD1A",      # 10% purple border
+  weight = 1,
+  group = "Pantry Coverage"      # adjust this value to get your desired lightne
+) %>%
+
+  
+  # Food Pantry MARKERS 
+  addMarkers(
+    data = pantries,
+    lng = ~long,
+    lat = ~lat,
+    popup = ~paste(
+      "<strong>", Pantry.Name, "</strong><br>",
+      "Address: ", Address, "<br>",
+      "Hours: ", Recurring.Hours, "<br>",
+      "Requirements: ", What.to.Bring,
+      "<a href='", Link, "' target='_blank'>View on Google Maps</a>"
+    ),
+    clusterOptions = markerClusterOptions(),
+    group = "Food Pantries"
+  ) %>%
+  
+  # Layer control
+  addLayersControl(
+    overlayGroups = c("Poverty Level", "Food Pantries", "Pantry Coverage", "Bus Routes"),  # the county lines will not be toggable (they're fixed)
+    options = layersControlOptions(collapsed = FALSE)
+  ) %>%
+  
+  hideGroup(c("Poverty Level", "Bus Routes", "Pantry Coverage", "Food Pantries"))  
+
+map1
+```
