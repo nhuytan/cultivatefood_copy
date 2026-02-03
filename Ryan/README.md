@@ -34,6 +34,7 @@ The notebook expects the following datasets in CSV format:
 * `Elkhart_PovPercent_Transposed.csv`
 * `Marhsall_PovPercent_Transposed.csv`
 * `St_Joseph_PovPercent_Transposed.csv`
+* `Schools Impact Data.csv`
 * `Outbound.csv`
 
 
