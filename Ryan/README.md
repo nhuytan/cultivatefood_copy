@@ -16,6 +16,12 @@ To run this notebook, you will need the following Python libraries installed:
 * **Seaborn**: For statistical data visualization.
 * **Jupyter**: To execute the `.ipynb` file.
 
+To run the dashboard, you will need the following Python libraries installed:
+
+* **Dash**: For building interactive, data-driven web applications and dashboards
+* **Dash-Bootstrap-Components**: Adds Bootstrap-themed layout and UI components
+* **Plotly**: Provides a wide range of rich, web-based charts and visualizations
+
 You can install the dependencies using pip:
 
 ```bash
