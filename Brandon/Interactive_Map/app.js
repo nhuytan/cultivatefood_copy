@@ -232,10 +232,10 @@ function over65Color(pct) {
 // FOOD INSECURITY INDEX (1–10, red-orange ramp: darker = more food insecure)
 function foodInsecurityColor(idx) {
   if (!Number.isFinite(idx)) return "#cccccc";
-  if (idx <= 2)  return "#fff5f0";
-  if (idx <= 4)  return "#fcbba1";
-  if (idx <= 6)  return "#fb6a4a";
-  if (idx <= 8)  return "#cb181d";
+  if (idx <= 2) return "#fff5f0";
+  if (idx <= 4) return "#fcbba1";
+  if (idx <= 6) return "#fb6a4a";
+  if (idx <= 8) return "#cb181d";
   return "#67000d";
 }
 
@@ -514,10 +514,10 @@ function addFoodInsecurityLegend(map) {
     const div = L.DomUtil.create("div", "legend");
     div.innerHTML = `<b>Food Insecurity Index</b><br>`;
     const bands = [
-      { label: "1–2",  color: foodInsecurityColor(1) },
-      { label: "3–4",  color: foodInsecurityColor(3) },
-      { label: "5–6",  color: foodInsecurityColor(5) },
-      { label: "7–8",  color: foodInsecurityColor(7) },
+      { label: "1–2", color: foodInsecurityColor(1) },
+      { label: "3–4", color: foodInsecurityColor(3) },
+      { label: "5–6", color: foodInsecurityColor(5) },
+      { label: "7–8", color: foodInsecurityColor(7) },
       { label: "9–10", color: foodInsecurityColor(9) },
     ];
     bands.forEach(b => {
@@ -559,7 +559,7 @@ async function addBusRoutesLayer(map) {
   return routesLayer;
 }
 
-async function buildClientClusterLayer(geojsonPath = "CCFN_Clients_new.geojson") {
+async function buildClientClusterLayer(geojsonPath = "CCFN_Clients.geojson") {
   const res = await fetch(geojsonPath);
   if (!res.ok) throw new Error(`Failed to load ${geojsonPath}`);
   const geojson = await res.json();
@@ -603,7 +603,7 @@ async function buildClientClusterLayer(geojsonPath = "CCFN_Clients_new.geojson")
 
 // CFR Headquarters marker (Cultivate Food Rescue main base)
 // Address: 1345 W Mishawaka Ave, South Bend, IN 46615
-const CFR_HQ = { lat: 41.6822, lon: -86.2480 };
+const CFR_HQ = { lat: 41.659479, lon: -86.265593 };
 
 function addCFRHeadquarters(map) {
   // Custom large star/home icon for HQ
@@ -730,7 +730,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const map = initBaseMap();
 
   // Always on (wrapped so a fetch error never blocks the rest of the map)
-  try { await addCountyBoundaries(map); } catch(e) { console.warn("County boundaries failed to load:", e); }
+  try { await addCountyBoundaries(map); } catch (e) { console.warn("County boundaries failed to load:", e); }
 
   // CFR Headquarters — always visible, no fetch dependency
   addCFRHeadquarters(map);
@@ -760,93 +760,146 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // --- helper: turn everything off ---
   function turnOffAllOverlays() {
-    // poverty off
     if (povertyLayer && povertyOn) {
       map.removeLayer(povertyLayer);
       povertyOn = false;
-
       if (povertyLegend) {
         map.removeControl(povertyLegend);
         povertyLegend = null;
       }
-
-      const btnP = document.getElementById("togglePoverty");
-      if (btnP) btnP.textContent = "Show Poverty";
+      setButtonOff(document.getElementById("togglePoverty"), "Show Poverty");
     }
 
-    // routes off
     if (routesLayer && routesOn) {
       map.removeLayer(routesLayer);
       routesOn = false;
-
-      const btnR = document.getElementById("toggleRoutes");
-      if (btnR) btnR.textContent = "Show Bus Routes";
+      setButtonOff(document.getElementById("toggleRoutes"), "Show Bus Routes");
     }
 
-    //Income off
     if (incomeLayer && incomeOn) {
       map.removeLayer(incomeLayer);
       incomeOn = false;
-
       if (incomeLegend) {
         map.removeControl(incomeLegend);
         incomeLegend = null;
       }
-
-      const btnI = document.getElementById("toggleIncome");
-      if (btnI) btnI.textContent = "Show Income";
+      setButtonOff(document.getElementById("toggleIncome"), "Show Income");
     }
 
-    // under 18 off
     if (u18Layer && u18On) {
       map.removeLayer(u18Layer);
       u18On = false;
-      if (u18Legend) { map.removeControl(u18Legend); u18Legend = null; }
-      const b = document.getElementById("toggleU18");
-      if (b) b.textContent = "Show Under 18";
+      if (u18Legend) {
+        map.removeControl(u18Legend);
+        u18Legend = null;
+      }
+      setButtonOff(document.getElementById("toggleU18"), "Show Under 18");
     }
 
-    // over 65 off
     if (over65Layer && over65On) {
       map.removeLayer(over65Layer);
       over65On = false;
-      if (over65Legend) { map.removeControl(over65Legend); over65Legend = null; }
-      const b = document.getElementById("toggle65");
-      if (b) b.textContent = "Show Over 65";
+      if (over65Legend) {
+        map.removeControl(over65Legend);
+        over65Legend = null;
+      }
+      setButtonOff(document.getElementById("toggle65"), "Show Over 65");
     }
 
-    //Partners/clients off
-    // clients off
     if (clientsLayer && clientsOn) {
       map.removeLayer(clientsLayer);
       clientsOn = false;
-      const btnC = document.getElementById("toggleClients");
-      if (btnC) btnC.textContent = "Show Client Pins";
+      setButtonOff(document.getElementById("toggleClients"), "Show Partners");
     }
 
-    // walking off
     if (walkLayer && walkOn) {
       map.removeLayer(walkLayer);
       walkOn = false;
-
       if (walkLegend) {
         map.removeControl(walkLegend);
         walkLegend = null;
       }
-
-      const btnW = document.getElementById("toggleWalk");
-      if (btnW) btnW.textContent = "Show Walking Coverage";
+      setButtonOff(document.getElementById("toggleWalk"), "Show Walking Coverage");
     }
 
-    // food insecurity off
     if (foodLayer && foodOn) {
       map.removeLayer(foodLayer);
       foodOn = false;
-      if (foodLegend) { map.removeControl(foodLegend); foodLegend = null; }
-      const btnF = document.getElementById("toggleFood");
-      if (btnF) { btnF.textContent = "Show Food Insecurity"; btnF.classList.remove("active"); }
+      if (foodLegend) {
+        map.removeControl(foodLegend);
+        foodLegend = null;
+      }
+      setButtonOff(document.getElementById("toggleFood"), "Show Food Insecurity");
+    }
+  }
+
+  // --- helper: turn off selected overlay
+  function turnOffSelectedOverlays() {
+    if (povertyLayer && povertyOn) {
+      map.removeLayer(povertyLayer);
+      povertyOn = false;
+      if (povertyLegend) {
+        map.removeControl(povertyLegend);
+        povertyLegend = null;
+      }
+      setButtonOff(document.getElementById("togglePoverty"), "Show Poverty");
     }
 
+    if (routesLayer && routesOn) {
+      map.removeLayer(routesLayer);
+      routesOn = false;
+      setButtonOff(document.getElementById("toggleRoutes"), "Show Bus Routes");
+    }
+
+    if (incomeLayer && incomeOn) {
+      map.removeLayer(incomeLayer);
+      incomeOn = false;
+      if (incomeLegend) {
+        map.removeControl(incomeLegend);
+        incomeLegend = null;
+      }
+      setButtonOff(document.getElementById("toggleIncome"), "Show Income");
+    }
+
+    if (u18Layer && u18On) {
+      map.removeLayer(u18Layer);
+      u18On = false;
+      if (u18Legend) {
+        map.removeControl(u18Legend);
+        u18Legend = null;
+      }
+      setButtonOff(document.getElementById("toggleU18"), "Show Under 18");
+    }
+
+    if (over65Layer && over65On) {
+      map.removeLayer(over65Layer);
+      over65On = false;
+      if (over65Legend) {
+        map.removeControl(over65Legend);
+        over65Legend = null;
+      }
+      setButtonOff(document.getElementById("toggle65"), "Show Over 65");
+    }
+
+    if (clientsLayer && clientsOn) {
+      map.removeLayer(clientsLayer);
+      clientsOn = false;
+      setButtonOff(document.getElementById("toggleClients"), "Show Partners");
+    }
+  }
+
+
+  // small helpers for button UI
+  function setButtonOn(button, hideText) {
+    if (!button) return;
+    button.textContent = hideText;
+    button.classList.add("active");
+  }
+
+  function setButtonOff(button, showText) {
+    if (!button) return;
+    button.textContent = showText;
+    button.classList.remove("active");
   }
 
   // -------- Poverty button --------
@@ -857,9 +910,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   btn_poverty.addEventListener("click", async () => {
-    // If poverty is currently OFF, turn others off then turn poverty ON
     if (!povertyOn) {
-      turnOffAllOverlays();
+      if (foodOn || walkOn) {
+        turnOffSelectedOverlays();
+      } else {
+        turnOffAllOverlays();
+      }
 
       if (!povertyLayer) povertyLayer = await buildPovertyLayer();
 
@@ -868,12 +924,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (!povertyLegend) povertyLegend = addPovertyLegend(map);
 
-      btn_poverty.textContent = "Hide Poverty";
+      setButtonOn(btn_poverty, "Hide Poverty");
       povertyOn = true;
       return;
     }
 
-    // If poverty is ON, turn it OFF
     map.removeLayer(povertyLayer);
     povertyOn = false;
 
@@ -882,7 +937,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       povertyLegend = null;
     }
 
-    btn_poverty.textContent = "Show Poverty";
+    setButtonOff(btn_poverty, "Show Poverty");
   });
 
   // -------- Routes button --------
@@ -891,26 +946,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.warn('Button with id="toggleRoutes" not found in HTML.');
   } else {
     btnRoutes.addEventListener("click", async () => {
-      // If routes is currently OFF, turn others off then turn routes ON
       if (!routesOn) {
-        turnOffAllOverlays();
+        if (foodOn || walkOn) {
+          turnOffSelectedOverlays();
+        } else {
+          turnOffAllOverlays();
+        }
 
-        if (!routesLayer) routesLayer = await addBusRoutesLayer(map); // ✅ pass map if your function needs it
-        // If your addBusRoutesLayer() does NOT take map, use:
-        // if (!routesLayer) routesLayer = await addBusRoutesLayer();
+        if (!routesLayer) routesLayer = await addBusRoutesLayer(map);
 
         routesLayer.addTo(map);
 
-        btnRoutes.textContent = "Hide Bus Routes";
+        setButtonOn(btnRoutes, "Hide Bus Routes");
         routesOn = true;
         return;
       }
 
-      // If routes is ON, turn it OFF
       map.removeLayer(routesLayer);
       routesOn = false;
 
-      btnRoutes.textContent = "Show Bus Routes";
+      setButtonOff(btnRoutes, "Show Bus Routes");
     });
   }
 
@@ -920,36 +975,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.warn('Button with id="toggleIncome" not found in HTML.');
   } else {
     btnIncome.addEventListener("click", async () => {
-      // If income is currently OFF, turn others off then turn income ON
       if (!incomeOn) {
-        turnOffAllOverlays();
+        if (foodOn || walkOn) {
+          turnOffSelectedOverlays();
+        } else {
+          turnOffAllOverlays();
+        }
 
-        if (!incomeLayer) incomeLayer = await buildIncomeLayer(); // uses your default geojsonPath
+        if (!incomeLayer) incomeLayer = await buildIncomeLayer();
 
         incomeLayer.addTo(map);
-
-        // Optional: fit to bounds like poverty does
         map.fitBounds(incomeLayer.getBounds());
 
-        // Optional: legend
         if (!incomeLegend) incomeLegend = addIncomeLegend(map);
 
-        btnIncome.textContent = "Hide Income";
+        setButtonOn(btnIncome, "Hide Income");
         incomeOn = true;
         return;
       }
 
-      // If income is ON, turn it OFF
       map.removeLayer(incomeLayer);
       incomeOn = false;
 
-      // Remove legend if you used it
       if (incomeLegend) {
         map.removeControl(incomeLegend);
         incomeLegend = null;
       }
 
-      btnIncome.textContent = "Show Income";
+      setButtonOff(btnIncome, "Show Income");
     });
   }
 
@@ -958,19 +1011,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (btnU18) {
     btnU18.addEventListener("click", async () => {
       if (!u18On) {
-        turnOffAllOverlays();
+        if (foodOn || walkOn) {
+          turnOffSelectedOverlays();
+        } else {
+          turnOffAllOverlays();
+        }
+
         if (!u18Layer) u18Layer = await buildUnder18Layer();
+
         u18Layer.addTo(map);
         map.fitBounds(u18Layer.getBounds());
+
         if (!u18Legend) u18Legend = addU18Legend(map);
-        btnU18.textContent = "Hide Under 18";
+
+        setButtonOn(btnU18, "Hide Under 18");
         u18On = true;
         return;
       }
+
       map.removeLayer(u18Layer);
       u18On = false;
-      if (u18Legend) { map.removeControl(u18Legend); u18Legend = null; }
-      btnU18.textContent = "Show Under 18";
+
+      if (u18Legend) {
+        map.removeControl(u18Legend);
+        u18Legend = null;
+      }
+
+      setButtonOff(btnU18, "Show Under 18");
     });
   }
 
@@ -979,19 +1046,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (btn65) {
     btn65.addEventListener("click", async () => {
       if (!over65On) {
-        turnOffAllOverlays();
+        if (foodOn || walkOn) {
+          turnOffSelectedOverlays();
+        } else {
+          turnOffAllOverlays();
+        }
+
         if (!over65Layer) over65Layer = await buildOver65Layer();
+
         over65Layer.addTo(map);
         map.fitBounds(over65Layer.getBounds());
+
         if (!over65Legend) over65Legend = addOver65Legend(map);
-        btn65.textContent = "Hide Over 65";
+
+        setButtonOn(btn65, "Hide Over 65");
         over65On = true;
         return;
       }
+
       map.removeLayer(over65Layer);
       over65On = false;
-      if (over65Legend) { map.removeControl(over65Legend); over65Legend = null; }
-      btn65.textContent = "Show Over 65";
+
+      if (over65Legend) {
+        map.removeControl(over65Legend);
+        over65Legend = null;
+      }
+
+      setButtonOff(btn65, "Show Over 65");
     });
   }
 
@@ -1000,21 +1081,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (btnFood) {
     btnFood.addEventListener("click", async () => {
       if (!foodOn) {
-        turnOffAllOverlays();
         if (!foodLayer) foodLayer = await buildFoodInsecurityLayer();
+
         foodLayer.addTo(map);
         map.fitBounds(foodLayer.getBounds());
+
         if (!foodLegend) foodLegend = addFoodInsecurityLegend(map);
+
         foodOn = true;
-        btnFood.textContent = "Hide Food Insecurity";
-        btnFood.classList.add("active");
+        setButtonOn(btnFood, "Hide Food Insecurity");
         return;
       }
+
       map.removeLayer(foodLayer);
       foodOn = false;
-      if (foodLegend) { map.removeControl(foodLegend); foodLegend = null; }
-      btnFood.textContent = "Show Food Insecurity";
-      btnFood.classList.remove("active");
+
+      if (foodLegend) {
+        map.removeControl(foodLegend);
+        foodLegend = null;
+      }
+
+      setButtonOff(btnFood, "Show Food Insecurity");
     });
   }
 
@@ -1022,21 +1109,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnClients = document.getElementById("toggleClients");
   btnClients.addEventListener("click", async () => {
     if (!clientsOn) {
-      turnOffAllOverlays(); // if you're doing "only one on at a time"
+      if (foodOn || walkOn) {
+        turnOffSelectedOverlays();
+      } else {
+        turnOffAllOverlays();
+      }
 
       if (!clientsLayer) clientsLayer = await buildClientClusterLayer();
 
       clientsLayer.addTo(map);
-      // optional: zoom to clusters first time
-      // map.fitBounds(clientsLayer.getBounds());
 
-      btnClients.textContent = "Hide Partners";
+      setButtonOn(btnClients, "Hide Partners");
       clientsOn = true;
-    } else {
-      map.removeLayer(clientsLayer);
-      btnClients.textContent = "Show Partners";
-      clientsOn = false;
+      return;
     }
+
+    map.removeLayer(clientsLayer);
+    clientsOn = false;
+
+    setButtonOff(btnClients, "Show Partners");
   });
 
   // -------- Walking Coverage button --------
@@ -1054,8 +1145,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!walkLegend) walkLegend = addWalkLegend(map);
 
         walkOn = true;
-        btnWalk.textContent = "Hide Walking Coverage";
-        btnWalk.classList.add("active");
+        setButtonOn(btnWalk, "Hide Walking Coverage");
         return;
       }
 
@@ -1067,8 +1157,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         walkLegend = null;
       }
 
-      btnWalk.textContent = "Show Walking Coverage";
-      btnWalk.classList.remove("active");
+      setButtonOff(btnWalk, "Show Walking Coverage");
     });
   }
 
@@ -1076,7 +1165,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const tractLayer = await addTractLayer(map);
     tractLayer.addTo(map);
-  } catch(e) { console.warn("Tract layer failed to load:", e); }
+  } catch (e) { console.warn("Tract layer failed to load:", e); }
 
   main().catch(err => console.error("Error in main:", err));
 });
